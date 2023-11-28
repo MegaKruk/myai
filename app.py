@@ -176,7 +176,7 @@ def remember():
 
 
 @app.route('/ask_search', methods=['POST'])
-def remember():
+def ask_search():
     try:
         data = request.json
         print(f"data:\n{data}")
