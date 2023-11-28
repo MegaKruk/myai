@@ -136,7 +136,7 @@ def detect_query_intention(query):
 
 
 def remember(info):
-    # TODO: replace with qdrant
+    # TODO: replace with qdrant for better context injection
     conversation_context.append(info)
     return f"OK. Info '{info}' was saved to context"
 
