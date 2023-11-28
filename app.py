@@ -4,8 +4,14 @@ from framework.myai_framework import *
 app = Flask(__name__)
 
 
-@app.route('/ask', methods=['POST'])
-def ask():
+@app.route('/remember', methods=['POST'])
+def remember():
+    # TODO: replace with qdrant for better context injection
+    return "i member!"
+
+
+@app.route('/ask_detect_intent', methods=['POST'])
+def ask_detect_intent():
     try:
         # Extract question from JSON
         data = request.json
@@ -33,12 +39,6 @@ def ask():
         return jsonify({"reply": str(e)})
 
 
-@app.route('/remember', methods=['POST'])
-def remember():
-    # TODO: replace with qdrant for better context injection
-    return "i member!"
-
-
 @app.route('/ask_search', methods=['POST'])
 def ask_search():
     try:
@@ -48,6 +48,20 @@ def ask_search():
         serpapi_search_results = serpapi_search(question_or_info)
         serpapi_context = extract_context_from_serpapi_results(serpapi_search_results)
         answer = answer_question(question_or_info, serpapi_context)
+        return jsonify({"reply": answer})
+
+    except Exception as e:
+        # Handle exceptions (e.g., bad JSON)
+        return jsonify({"reply": str(e)})
+
+
+@app.route('/ask', methods=['POST'])
+def ask():
+    try:
+        data = request.json
+        print(f"data:\n{data}")
+        question = data.get('question')
+        answer = answer_question(question, [])
         return jsonify({"reply": answer})
 
     except Exception as e:
