@@ -135,13 +135,12 @@ def detect_query_intention(query):
     return intent_dict
 
 
-def remember(info):
-    # TODO: replace with qdrant for better context injection
+def remember_old(info):
     conversation_context.append(info)
     return f"OK. Info '{info}' was saved to context"
 
 
-@app.route('/', methods=['POST'])
+@app.route('/ask', methods=['POST'])
 def ask():
     try:
         # Extract question from JSON
@@ -155,7 +154,7 @@ def ask():
             answer = answer_question(question_or_info, [])
         elif intent["intent"] == "remember":
             # Add info to the context, later replace with qdrant?
-            answer = remember(question_or_info)
+            answer = remember_old(question_or_info)
         elif intent["intent"] == "complex_question":
             serpapi_search_results = serpapi_search(question_or_info)
             serpapi_context = extract_context_from_serpapi_results(serpapi_search_results)
@@ -168,6 +167,34 @@ def ask():
     except Exception as e:
         # Handle exceptions (e.g., bad JSON)
         return jsonify({"reply": str(e)})
+
+
+@app.route('/remember', methods=['POST'])
+def remember():
+    # TODO: replace with qdrant for better context injection
+    return "i member!"
+
+
+@app.route('/ask_search', methods=['POST'])
+def remember():
+    try:
+        data = request.json
+        print(f"data:\n{data}")
+        question_or_info = data.get('question')
+        serpapi_search_results = serpapi_search(question_or_info)
+        serpapi_context = extract_context_from_serpapi_results(serpapi_search_results)
+        answer = answer_question(question_or_info, serpapi_context)
+        return jsonify({"reply": answer})
+
+    except Exception as e:
+        # Handle exceptions (e.g., bad JSON)
+        return jsonify({"reply": str(e)})
+
+
+@app.route('/', methods=['GET'])
+def main():
+    # TODO: create frontend or CLI
+    return "Render index.html here"
 
 
 @app.route('/md2html', methods=['POST'])
@@ -190,7 +217,7 @@ def context():
 
 @app.route('/health')
 def health():
-    return "ownapi app is healthy"
+    return "myai app is healthy"
 
 
 @app.route('/clear_context', methods=['POST'])
