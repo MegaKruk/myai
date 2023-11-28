@@ -1,8 +1,9 @@
+from my_secrets.my_secrets import *
 import requests
 import json
 import uuid
-from my_secrets.my_secrets import *
 import ast
+
 
 conversation_context = [] # Global variable to store context (old)
 
@@ -267,3 +268,35 @@ def compress_data(data):
             compressed_info.append(info.replace('. ', '.').replace(', ', ',').replace("\t", "").replace("\n", ""))
         compressed_data[person] = compressed_info
     return compressed_data
+
+
+def count_tokens(messages, model="gpt-3.5-turbo-0613"):
+    # Mock encoding function, as we don't have the actual encoding logic
+    def encode(text):
+        # This is a simplification. In reality, encoding depends on the model's vocabulary.
+        return len(text.split())
+
+    # Model-specific token counts
+    if model in ["gpt-3.5-turbo-0613", "gpt-3.5-turbo-16k-0613", "gpt-4-0314", "gpt-4-32k-0314", "gpt-4-0613", "gpt-4-32k-0613"]:
+        tokens_per_message = 3
+        tokens_per_name = 1
+    elif model == "gpt-3.5-turbo-0301":
+        tokens_per_message = 4
+        tokens_per_name = -1
+    elif "gpt-3.5-turbo" in model:
+        # Recursive call for certain conditions, assuming the default model
+        return count_tokens(messages, "gpt-3.5-turbo-0613")
+    elif "gpt-4" in model:
+        return count_tokens(messages, "gpt-4-0613")
+    else:
+        raise ValueError(f"count_tokens is not implemented for model {model}.")
+
+    num_tokens = 0
+    for message in messages:
+        num_tokens += tokens_per_message + encode(message['content'])
+        if 'name' in message:
+            num_tokens += encode(message['name']) + tokens_per_name
+
+    # Adding a constant token count (as in the TypeScript version)
+    num_tokens += 3
+    return num_tokens

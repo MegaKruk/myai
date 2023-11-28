@@ -57,6 +57,7 @@ def ask_search():
 
 @app.route('/ask', methods=['POST'])
 def ask():
+    # TODO: remember also previous messages and responses
     try:
         data = request.json
         print(f"data:\n{data}")
